@@ -2,30 +2,47 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const { v4: uuidv4 } = require('uuid');
-dotenv.config();
 const {
     decodeRequest,
     buildErrorResponse,
     buildSuccessResponse,
     buildResponseMessage,
 } = require('../shared');
-const { userTypeEnum} = require("./schema");
 const Boom = require('@hapi/boom');
+const { generateAccessToken, generateRefreshToken } = require('../../plugins/bearerAuthentication')
+dotenv.config();
 
 
 async function signUp(request, h) {
     try {
         const { payload, db } = decodeRequest(request);
-        const id = uuidv4();
+        const { password, username } = payload;
         // Hash the password, you can adjust the saltRounds value (e.g., 10) as per your requirements
-        const hashedPassword = await bcrypt.hash(payload.password, 10);
-        payload.password = hashedPassword;
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const userRole = await db.models.UserRole.findOne({
+           where: {
+               userRoleName: 'User',
+           }
+        });
+
+        const user = await db.models.User.findOne({
+            where: {
+                username,
+            }
+        });
+
+        if (user) {
+            throw Boom.notFound('This username already existed');
+        }
 
         // Create the user with the hashed password
-        const user = await db.models.User.create({
-            id,
-            userType: userTypeEnum.USER,
-            ...payload,
+        await db.models.User.create({
+            id: uuidv4(),
+            userRoleId: userRole.id,
+            isStatus: true,
+            username,
+            password: hashedPassword,
         });
 
         // TODO need create service send email to verify account
@@ -58,10 +75,9 @@ async function login(request, h) {
             return buildErrorResponse(h, 'Invalid username or password', 401);
         }
 
-        // Generate JWT token with 1 hours expiration time
-        const token = jwt.sign({ userId: user.id }, process.env.SECRET_KEY, { expiresIn: '1h' });
-
-        return buildSuccessResponse(h, { token }, 200);
+        const accessToken = generateAccessToken({ userId: user.id });
+        const refreshToken = generateRefreshToken({ userId: user.id });
+        return buildSuccessResponse(h, { accessToken, refreshToken }, 200);
     } catch (error) {
         return buildErrorResponse(h, 'Login failed', 400, error);
     }

@@ -32,6 +32,7 @@ const swaggerOptions = {
         },
     },
     security: [{ Bearer: [] }],
+    jsonPath: '/swagger.json'
 };
 
 async function createServer() {
@@ -84,7 +85,29 @@ async function createServer() {
         { plugin: HapiSwagger, options: swaggerOptions },
     ]);
 
+    await printRegisteredRoutes(server);
+    await printLogApiRequest(server);
+
     return server;
+}
+
+// Log each incoming request
+async function printLogApiRequest(server) {
+    server.ext('onRequest', (request, h) => {
+        console.log(`[${new Date().toISOString()}] ${request.method.toUpperCase()}: ${request.path}`);
+        return h.continue;
+    });
+}
+
+
+// Print all registered routes
+async function printRegisteredRoutes(server) {
+    console.log('\x1b[34mRegistered API routes: store_api\x1b[0m');
+    server.table().forEach(route => {
+        if (!route.path.startsWith('/swaggerui') && route.path !== '/documentation') {
+            console.log('\x1b[34m%s\x1b[0m', `${route.method.toUpperCase()}: ${route.path}`);
+        }
+    });
 }
 
 const startServer = async () => {

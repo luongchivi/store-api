@@ -2,22 +2,26 @@ const { DataTypes } = require('sequelize');
 
 const { DB_TABLE_NAMES } = require('../constants');
 
-const { userTypeEnum } = require('../../routes/user/schema');
-
 
 module.exports = sequelize => (
     sequelize.define(DB_TABLE_NAMES.USER, {
+        userRoleId: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
         username: {
             type: DataTypes.STRING,
             allowNull: false,
+            unique: true,
         },
         password: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        userType: {
-            type: DataTypes.ENUM(...Object.values(userTypeEnum)),
-            allowNull: true,
+        isStatus: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: true,
+            allowNull: false,
         },
     }, {
         underscored: true,

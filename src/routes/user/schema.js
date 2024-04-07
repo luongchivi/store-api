@@ -55,7 +55,8 @@ const LoginReq = defaultSchema
 
 const LoginRes = Joi.object({
     results: Joi.object({
-        token: Joi.string().required(),
+        accessToken: Joi.string().required(),
+        refreshToken: Joi.string().required(),
     })
 })
     .tailor('post')

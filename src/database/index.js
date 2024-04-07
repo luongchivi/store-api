@@ -15,7 +15,7 @@
 const { Sequelize } = require('sequelize');
 
 const Models = require('./models');
-// const Associations = require('./associations');
+const Associations = require('./associations');
 
 
 module.exports = {
@@ -49,7 +49,7 @@ module.exports = {
         const sequelize = new Sequelize(dbName, dbUser, dbPass, baseConfig);
 
         Models.init(sequelize);
-        // Associations.init(sequelize);
+        Associations.init(sequelize);
 
         if (sync) {
             await sequelize.sync();

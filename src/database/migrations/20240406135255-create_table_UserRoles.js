@@ -4,29 +4,21 @@ const { DataTypes } = require('sequelize');
 
 const { DB_TABLE_NAMES, getTableNameForMigrations } = require('../constants');
 
-const { userTypeEnum } = require('../../routes/user/schema');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up (queryInterface, _Sequelize) {
     return queryInterface.sequelize.transaction(async t => {
-      await queryInterface.createTable(getTableNameForMigrations(DB_TABLE_NAMES.USER), {
+      await queryInterface.createTable(getTableNameForMigrations(DB_TABLE_NAMES.USER_ROLE), {
         id: {
           type: DataTypes.STRING,
           primaryKey: true,
           allowNull: false,
         },
-        username: {
+        user_role_name: {
           type: DataTypes.STRING,
           allowNull: false,
-        },
-        password: {
-          type: DataTypes.STRING,
-          allowNull: false,
-        },
-        user_type: {
-          type: DataTypes.ENUM(...Object.values(userTypeEnum)),
-          allowNull: true,
+          unique: true,
         },
         created_at: {
           type: DataTypes.DATE,
@@ -40,9 +32,9 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down (queryInterface, _Sequelize) {
     return queryInterface.sequelize.transaction(async t => {
-      await queryInterface.dropTable(getTableNameForMigrations(DB_TABLE_NAMES.USER), { transaction: t });
+      await queryInterface.dropTable(getTableNameForMigrations(DB_TABLE_NAMES.USER_ROLE), { transaction: t });
     });
   }
 };

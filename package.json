@@ -4,8 +4,12 @@
   "description": "Hapi framework, ORM sequelize, postgres, store_api",
   "main": "index.js",
   "scripts": {
+    "db:drop": "yarn sequelize-cli db:drop",
+    "db:create": "yarn sequelize-cli db:create",
     "migrate:up": "yarn sequelize-cli db:migrate",
-    "migrate:down": "yarn sequelize-cli db:migrate:undo"
+    "migrate:down": "yarn sequelize-cli db:migrate:undo",
+    "seed:up": "sequelize-cli db:seed:all",
+    "seed:down": "sequelize-cli db:seed:undo"
   },
   "keywords": [],
   "author": "",
